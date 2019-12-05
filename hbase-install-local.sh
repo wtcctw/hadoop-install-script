@@ -6,6 +6,18 @@ exit_script(){
     exit 1
 }
 
+########################### ssh #####################################
+#SSH免密登录
+setSSH(){
+	echo '配置hadoop用户免密登录(以hadoop用户执行)开始'
+	su - hadoop -c "ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa"
+	su - hadoop -c "cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys"
+	su - hadoop -c "chmod 0600 ~/.ssh/authorized_keys"
+	su - hadoop -c "ssh-keyscan -H localhost >> ~/.ssh/known_hosts"
+	su - hadoop -c "ssh-keyscan -H 0.0.0.0 >> ~/.ssh/known_hosts"
+	echo '配置hadoop用户免密登录(以hadoop用户执行)结束'
+}
+
 
 ########################### 安装hbase #####################################
 unzipHbase(){
@@ -121,15 +133,18 @@ startHbase(){
 
 #控制台输入选项
 consoleInput(){
-	echo '请输入选项[1-2]'
+	echo '请输入选项[1-3]'
 	echo '1、安装hbase'
 	echo '2、启动hbase伪分布式(以hadoop用户执行) - HMaster, RegionServer, zookeeper三个进程，Hdfs存储'
-	echo '请输入选项[1-2]'
+	echo '3、ssh免密登录(hadoop用户)'
+	echo '请输入选项[1-3]'
 	read aNum
 	case $aNum in
 		1)  installHbase
 		;;
 		2)  startHbase
+		;;
+		3)  setSSH
 		;;
 		*)  echo '没有该选项，请重新输入!!!退出请按Ctrl+c'
 			consoleInput
